@@ -1,0 +1,6 @@
+1. gcc getdata.c -o getdata.out to update getdata.out
+2. Make sure app is running on the phone
+3. Note down the ip address of the device from app screen
+3. ./getdata.out <IPAddr> req
+		Example: ./getdata.out 10.42.0.54 req
+4. Output will come in gyro.txt and linacc.txt

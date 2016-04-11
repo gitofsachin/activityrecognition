@@ -1,0 +1,3 @@
+../svm-scale -r scalepars mydata > mydata_scaled
+../svm-predict mydata_scaled mytraining_model output
+

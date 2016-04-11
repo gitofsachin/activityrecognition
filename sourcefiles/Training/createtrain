@@ -1,0 +1,54 @@
+#!/bin/bash
+runcount=0;
+swingcount=0;
+textcount=0;
+for FILE in *
+do
+	if echo $FILE | grep -e "^lin" > /dev/null; then
+		if echo $FILE | grep -e "running_suresh4" > /dev/null; then
+			for FILEIN in *
+			do
+				if echo $FILEIN | grep -e "^gyr_running" > /dev/null; then
+					if [ "${FILE:3:(${#FILE}-3)}" == "${FILEIN:3:(${#FILEIN}-3)}" ]; then
+						runcount=$((runcount+1));						
+						if test $runcount -lt 2; then
+							echo $FILE;
+							echo $FILEIN;
+							octave --silent dataintegrate_overlap $FILE $FILEIN output2 1
+						fi
+					fi	
+				fi
+			done
+		fi
+		if echo $FILE | grep -e "swinging_suresh4" > /dev/null; then
+			for FILEIN in *
+			do
+				if echo $FILEIN | grep -e "^gyr_swinging" > /dev/null; then
+					if [ "${FILE:3:(${#FILE}-3)}" == "${FILEIN:3:(${#FILEIN}-3)}" ]; then
+						swingcount=$((swingcount+1));						
+						if test $swingcount -lt 2; then
+							echo $FILE;
+							echo $FILEIN;
+							octave --silent dataintegrate_overlap $FILE $FILEIN output2 2
+						fi
+					fi	
+				fi
+			done
+		fi
+		if echo $FILE | grep -e "texting_suresh4" > /dev/null; then
+			for FILEIN in *
+			do
+				if echo $FILEIN | grep -e "^gyr_texting" > /dev/null; then
+					if [ "${FILE:3:(${#FILE}-3)}" == "${FILEIN:3:(${#FILEIN}-3)}" ]; then
+						textcount=$((textcount+1));						
+						if test $textcount -lt 2; then
+							echo $FILE;
+							echo $FILEIN;
+							octave --silent dataintegrate_overlap $FILE $FILEIN output2 3
+						fi
+					fi	
+				fi
+			done
+		fi
+	fi
+done

@@ -1,0 +1,25 @@
+arglist=argv();
+fid=fopen(arglist{1},"w");
+nos=str2num(arglist{2});
+for i=1:1:nos
+
+	x=floor(rand()*10);
+	y=floor(rand()*10);
+
+	if(x<3)
+		fwrite(fid,"-2 1:");
+	elseif(y>8)
+		fwrite(fid,"2 1:");
+	elseif(x^2+y^2>25)
+		fwrite(fid,"1 1:");
+	else
+		fwrite(fid,"-1 1:");
+	endif
+
+	fwrite(fid,num2str(x));
+	fwrite(fid," 2:");
+	fwrite(fid,num2str(y));
+	fwrite(fid,"\n");
+
+end
+fclose(fid);

@@ -1,0 +1,5 @@
+1. Create data to be predicted in feature vector form
+	octave --silent dataintegrate_overlap linacc.txt gyro.txt mydata 1
+2. Transfer mydata to ../libsvm-3.21/tools/ folder
+3. call predict funtion
+4. Predicted category in ../libsvm-3.21/tools/output

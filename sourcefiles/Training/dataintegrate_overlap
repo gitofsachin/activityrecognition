@@ -1,0 +1,481 @@
+arglist=argv();
+inputfilename1=arglist{1};
+inputfilename2=arglist{2};
+outputfilename=arglist{3};
+actoutput=arglist{4};
+windowsize=64;
+
+fid=fopen(inputfilename1,"r");
+fid2=fopen(inputfilename2,"r");
+
+line=fgetl(fid);
+line2=fgetl(fid2);
+flag=0;
+
+avgx=zeros(10000,'float');
+avgy=zeros(10000,'float');
+avgz=zeros(10000,'float');
+avgt=zeros(10000,'float');
+engx=zeros(10000,'float');
+engy=zeros(10000,'float');
+engz=zeros(10000,'float');
+engt=zeros(10000,'float');
+
+avgxold=0;
+avgyold=0;
+avgzold=0;
+avgtold=0;
+
+engxold=0;
+engyold=0;
+engzold=0;
+engtold=0;
+
+avgx2=zeros(10000,'float');
+avgy2=zeros(10000,'float');
+avgz2=zeros(10000,'float');
+avgt2=zeros(10000,'float');
+engx2=zeros(10000,'float');
+engy2=zeros(10000,'float');
+engz2=zeros(10000,'float');
+engt2=zeros(10000,'float');
+
+avgxold2=0;
+avgyold2=0;
+avgzold2=0;
+avgtold2=0;
+
+engxold2=0;
+engyold2=0;
+engzold2=0;
+engtold2=0;
+
+i=1;
+lineno=0;
+while(ischar(line))
+%%while(lineno<4000)
+	values=str2num(line);
+	values2=str2num(line2);
+
+	if(length(values)==4)
+		flag++;
+		if(flag<=windowsize/2)
+			avgxold=avgxold+values(2);
+			avgyold=avgyold+values(3);
+			avgzold=avgzold+values(4);
+			avgtold=avgtold+sqrt(values(2)^2+values(3)^2+values(4)^2);
+
+			engxold=engxold+values(2)^2;
+			engyold=engyold+values(3)^2;
+			engzold=engzold+values(4)^2;
+			engtold=engtold+(values(2)^2+values(3)^2+values(4)^2);
+
+			avgxold2=avgxold2+values2(2);
+			avgyold2=avgyold2+values2(3);
+			avgzold2=avgzold2+values2(4);
+			avgtold2=avgtold2+sqrt(values2(2)^2+values2(3)^2+values2(4)^2);
+
+			engxold2=engxold2+values2(2)^2;
+			engyold2=engyold2+values2(3)^2;
+			engzold2=engzold2+values2(4)^2;
+			engtold2=engtold2+(values2(2)^2+values2(3)^2+values2(4)^2);
+
+		elseif(flag==windowsize/2+1)
+			avgx(i)=avgxold+values(2);
+			avgy(i)=avgyold+values(3);
+			avgz(i)=avgzold+values(4);
+			avgt(i)=avgtold+sqrt(values(2)^2+values(3)^2+values(4)^2);
+			avgxold=values(2);
+			avgyold=values(3);
+			avgzold=values(4);
+			avgtold=sqrt(values(2)^2+values(3)^2+values(4)^2);
+
+			engx(i)=engxold+values(2)^2;
+			engy(i)=engyold+values(3)^2;
+			engz(i)=engzold+values(4)^2;
+			engt(i)=engtold+(values(2)^2+values(3)^2+values(4)^2);
+			engxold=values(2)^2;
+			engyold=values(3)^2;
+			engzold=values(4)^2;
+			engtold=(values(2)^2+values(3)^2+values(4)^2);
+
+			avgx2(i)=avgxold2+values2(2);
+			avgy2(i)=avgyold2+values2(3);
+			avgz2(i)=avgzold2+values2(4);
+			avgt2(i)=avgtold2+sqrt(values2(2)^2+values2(3)^2+values2(4)^2);
+			avgxold2=values2(2);
+			avgyold2=values2(3);
+			avgzold2=values2(4);
+			avgtold2=sqrt(values2(2)^2+values2(3)^2+values2(4)^2);
+
+			engx2(i)=engxold2+values2(2)^2;
+			engy2(i)=engyold2+values2(3)^2;
+			engz2(i)=engzold2+values2(4)^2;
+			engt2(i)=engtold2+(values2(2)^2+values2(3)^2+values2(4)^2);
+			engxold2=values2(2)^2;
+			engyold2=values2(3)^2;
+			engzold2=values2(4)^2;
+			engtold2=(values2(2)^2+values2(3)^2+values2(4)^2);
+
+		elseif(flag==windowsize)
+			avgx(i)=(avgx(i)+values(2))/windowsize;
+			avgy(i)=(avgy(i)+values(3))/windowsize;
+			avgz(i)=(avgz(i)+values(4))/windowsize;
+			avgt(i)=(avgt(i)+sqrt(values(2)^2+values(3)^2+values(4)^2))/windowsize;
+			avgxold=avgxold+values(2);
+			avgyold=avgyold+values(3);
+			avgzold=avgzold+values(4);
+			avgtold=avgtold+sqrt(values(2)^2+values(3)^2+values(4)^2);
+			
+			engx(i)=(engx(i)+values(2)^2)/windowsize;
+			engy(i)=(engy(i)+values(3)^2)/windowsize;
+			engz(i)=(engz(i)+values(4)^2)/windowsize;
+			engt(i)=(engt(i)+(values(2)^2+values(3)^2+values(4)^2))/windowsize;
+			engxold=engxold+values(2)^2;
+			engyold=engyold+values(3)^2;
+			engzold=engzold+values(4)^2;
+			engtold=engtold+(values(2)^2+values(3)^2+values(4)^2);
+
+			avgx2(i)=(avgx2(i)+values2(2))/windowsize;
+			avgy2(i)=(avgy2(i)+values2(3))/windowsize;
+			avgz2(i)=(avgz2(i)+values2(4))/windowsize;
+			avgt2(i)=(avgt2(i)+sqrt(values2(2)^2+values2(3)^2+values2(4)^2))/windowsize;
+			avgxold2=avgxold2+values2(2);
+			avgyold2=avgyold2+values2(3);
+			avgzold2=avgzold2+values2(4);
+			avgtold2=avgtold2+sqrt(values2(2)^2+values2(3)^2+values2(4)^2);
+			
+			engx2(i)=(engx2(i)+values2(2)^2)/windowsize;
+			engy2(i)=(engy2(i)+values2(3)^2)/windowsize;
+			engz2(i)=(engz2(i)+values2(4)^2)/windowsize;
+			engt2(i)=(engt2(i)+(values2(2)^2+values2(3)^2+values2(4)^2))/windowsize;
+			engxold2=engxold2+values2(2)^2;
+			engyold2=engyold2+values2(3)^2;
+			engzold2=engzold2+values2(4)^2;
+			engtold2=engtold2+(values2(2)^2+values2(3)^2+values2(4)^2);
+
+			flag=windowsize/2;
+			i=i+1;
+		else
+			avgx(i)=avgx(i)+values(2);
+			avgy(i)=avgy(i)+values(3);
+			avgz(i)=avgz(i)+values(4);
+			avgt(i)=avgt(i)+sqrt(values(2)^2+values(3)^2+values(4)^2);
+			avgxold=avgxold+values(2);
+			avgyold=avgyold+values(3);
+			avgzold=avgzold+values(4);
+			avgtold=avgtold+sqrt(values(2)^2+values(3)^2+values(4)^2);
+
+			engx(i)=engx(i)+values(2)^2;
+			engy(i)=engy(i)+values(3)^2;
+			engz(i)=engz(i)+values(4)^2;
+			engt(i)=engt(i)+(values(2)^2+values(3)^2+values(4)^2);
+			engxold=engxold+values(2)^2;
+			engyold=engyold+values(3)^2;
+			engzold=engzold+values(4)^2;
+			engtold=engtold+(values(2)^2+values(3)^2+values(4)^2);
+
+			avgx2(i)=avgx2(i)+values2(2);
+			avgy2(i)=avgy2(i)+values2(3);
+			avgz2(i)=avgz2(i)+values2(4);
+			avgt2(i)=avgt2(i)+sqrt(values2(2)^2+values2(3)^2+values2(4)^2);
+			avgxold2=avgxold2+values2(2);
+			avgyold2=avgyold2+values2(3);
+			avgzold2=avgzold2+values2(4);
+			avgtold2=avgtold2+sqrt(values2(2)^2+values2(3)^2+values2(4)^2);
+
+			engx2(i)=engx2(i)+values2(2)^2;
+			engy2(i)=engy2(i)+values2(3)^2;
+			engz2(i)=engz2(i)+values2(4)^2;
+			engt2(i)=engt2(i)+(values2(2)^2+values2(3)^2+values2(4)^2);
+			engxold2=engxold2+values2(2)^2;
+			engyold2=engyold2+values2(3)^2;
+			engzold2=engzold2+values2(4)^2;
+			engtold2=engtold2+(values2(2)^2+values2(3)^2+values2(4)^2);
+		end
+	end
+	line=fgetl(fid);
+	line2=fgetl(fid2);
+	lineno=lineno+1;
+end
+%%end
+fclose(fid);
+
+fwriteid=fopen(outputfilename,"a");
+fid=fopen(inputfilename1,"r");
+fid2=fopen(inputfilename2,"r");
+line=fgetl(fid);
+line2=fgetl(fid2);
+flag=0;
+i=1;
+lineno=0;
+
+avgxold=0;
+avgyold=0;
+avgzold=0;
+avgtold=0;
+
+avgx1=0;
+avgy1=0;
+avgz1=0;
+avgt1=0;
+
+corxyold=0;
+coryzold=0;
+corxzold=0;
+
+corxy=0;
+coryz=0;
+corxz=0;
+
+avgxold2=0;
+avgyold2=0;
+avgzold2=0;
+avgtold2=0;
+
+avgx12=0;
+avgy12=0;
+avgz12=0;
+avgt12=0;
+
+corxyold2=0;
+coryzold2=0;
+corxzold2=0;
+
+corxy2=0;
+coryz2=0;
+corxz2=0;
+
+while(ischar(line))
+%%while(lineno<8000)
+	values=str2num(line);
+	values2=str2num(line2);
+	if(length(values)==4)
+		flag++;
+		if(flag<=windowsize/2)
+			avgxold=avgxold+(avgx(i)-values(2))^2;
+			avgyold=avgyold+(avgy(i)-values(3))^2;
+			avgzold=avgzold+(avgz(i)-values(4))^2;
+			avgtold=avgtold+(avgt(i)-sqrt(values(2)^2+values(3)^2+values(4)^2))^2;
+
+			corxyold=corxyold+values(2)*values(3);
+			coryzold=coryzold+values(3)*values(4);
+			corxzold=corxzold+values(2)*values(4);
+
+			avgxold2=avgxold2+(avgx2(i)-values2(2))^2;
+			avgyold2=avgyold2+(avgy2(i)-values2(3))^2;
+			avgzold2=avgzold2+(avgz2(i)-values2(4))^2;
+			avgtold2=avgtold2+(avgt2(i)-sqrt(values2(2)^2+values2(3)^2+values2(4)^2))^2;
+
+			corxyold2=corxyold2+values2(2)*values2(3);
+			coryzold2=coryzold2+values2(3)*values2(4);
+			corxzold2=corxzold2+values2(2)*values2(4);
+
+		elseif(flag==windowsize/2+1)
+			avgx1=avgxold+(avgx(i)-values(2))^2;
+			avgy1=avgyold+(avgy(i)-values(3))^2;
+			avgz1=avgzold+(avgz(i)-values(4))^2;
+			avgt1=avgtold+(avgt(i)-sqrt(values(2)^2+values(3)^2+values(4)^2))^2;
+			avgxold=(avgx(i)-values(2))^2;
+			avgyold=(avgy(i)-values(3))^2;
+			avgzold=(avgz(i)-values(4))^2;
+			avgtold=(avgt(i)-sqrt(values(2)^2+values(3)^2+values(4)^2))^2;
+
+			corxy=corxyold+values(2)*values(3);
+			coryz=coryzold+values(3)*values(4);
+			corxz=corxzold+values(2)*values(4);
+
+			corxyold=values(2)*values(3);
+			coryzold=values(3)*values(4);
+			corxzold=values(2)*values(4);
+
+			avgx12=avgxold2+(avgx2(i)-values2(2))^2;
+			avgy12=avgyold2+(avgy2(i)-values2(3))^2;
+			avgz12=avgzold2+(avgz2(i)-values2(4))^2;
+			avgt12=avgtold2+(avgt2(i)-sqrt(values2(2)^2+values2(3)^2+values2(4)^2))^2;
+			avgxold2=(avgx2(i)-values2(2))^2;
+			avgyold2=(avgy2(i)-values2(3))^2;
+			avgzold2=(avgz2(i)-values2(4))^2;
+			avgtold2=(avgt2(i)-sqrt(values2(2)^2+values2(3)^2+values2(4)^2))^2;
+
+			corxy2=corxyold2+values2(2)*values2(3);
+			coryz2=coryzold2+values2(3)*values2(4);
+			corxz2=corxzold2+values2(2)*values2(4);
+
+			corxyold2=values2(2)*values2(3);
+			coryzold2=values2(3)*values2(4);
+			corxzold2=values2(2)*values2(4);
+
+		elseif(flag==windowsize)
+			avgx1=sqrt((avgx1+(avgx(i)-values(2))^2)/windowsize);
+			avgy1=sqrt((avgy1+(avgy(i)-values(3))^2)/windowsize);
+			avgz1=sqrt((avgz1+(avgz(i)-values(4))^2)/windowsize);
+			avgt1=sqrt((avgt1+(avgt(i)-sqrt(values(2)^2+values(3)^2+values(4)^2))^2)/windowsize);
+			avgxold=avgxold+(avgx(i)-values(2))^2;
+			avgyold=avgyold+(avgy(i)-values(3))^2;
+			avgzold=avgzold+(avgz(i)-values(4))^2;
+			avgtold=avgtold+(avgt(i)-sqrt(values(2)^2+values(3)^2+values(4)^2))^2;
+
+			corxy=corxy+values(2)*values(3);
+			coryz=coryz+values(3)*values(4);
+			corxz=corxz+values(2)*values(4);
+			
+			corxyold=corxyold+values(2)*values(3);
+			coryzold=coryzold+values(3)*values(4);
+			corxzold=corxzold+values(2)*values(4);
+			
+			avgx12=sqrt((avgx12+(avgx2(i)-values2(2))^2)/windowsize);
+			avgy12=sqrt((avgy12+(avgy2(i)-values2(3))^2)/windowsize);
+			avgz12=sqrt((avgz12+(avgz2(i)-values2(4))^2)/windowsize);
+			avgt12=sqrt((avgt12+(avgt2(i)-sqrt(values2(2)^2+values2(3)^2+values2(4)^2))^2)/windowsize);
+			avgxold2=avgxold2+(avgx2(i)-values2(2))^2;
+			avgyold2=avgyold2+(avgy2(i)-values2(3))^2;
+			avgzold2=avgzold2+(avgz2(i)-values2(4))^2;
+			avgtold2=avgtold2+(avgt2(i)-sqrt(values2(2)^2+values2(3)^2+values2(4)^2))^2;
+
+			corxy2=corxy2+values2(2)*values2(3);
+			coryz2=coryz2+values2(3)*values2(4);
+			corxz2=corxz2+values2(2)*values2(4);
+			
+			corxyold2=corxyold2+values2(2)*values2(3);
+			coryzold2=coryzold2+values2(3)*values2(4);
+			corxzold2=corxzold2+values2(2)*values2(4);
+
+			fwrite(fwriteid,actoutput);
+			fwrite(fwriteid," 1:");
+			fwrite(fwriteid,num2str(avgx(i)));
+			fwrite(fwriteid," 2:");
+			fwrite(fwriteid,num2str(avgy(i)));
+			fwrite(fwriteid," 3:");
+			fwrite(fwriteid,num2str(avgz(i)));
+			%%fwrite(fwriteid," 4:");
+			%%fwrite(fwriteid,num2str(sqrt(avgx(i)^2+avgy(i)^2+avgz(i)^2)));
+			fwrite(fwriteid," 4:");
+			fwrite(fwriteid,num2str(avgt(i)));
+
+
+			fwrite(fwriteid," 5:");
+			fwrite(fwriteid,num2str(avgx1));
+			fwrite(fwriteid," 6:");
+			fwrite(fwriteid,num2str(avgy1));
+			fwrite(fwriteid," 7:");
+			fwrite(fwriteid,num2str(avgz1));
+			%%fwrite(fwriteid," 9:");
+			%%fwrite(fwriteid,num2str(sqrt(avgx1^2+avgy1^2+avgz1^2)));
+			fwrite(fwriteid," 8:");
+			fwrite(fwriteid,num2str(avgt1));
+
+			%%Power
+			fwrite(fwriteid," 9:");
+			fwrite(fwriteid,num2str(engx(i)));
+			fwrite(fwriteid," 10:");
+			fwrite(fwriteid,num2str(engy(i)));
+			fwrite(fwriteid," 11:");
+			fwrite(fwriteid,num2str(engz(i)));
+			fwrite(fwriteid," 12:");
+			fwrite(fwriteid,num2str(engt(i)));
+
+			%%Correlation
+			fwrite(fwriteid," 13:");
+			fwrite(fwriteid,num2str(corxy));
+			fwrite(fwriteid," 14:");
+			fwrite(fwriteid,num2str(coryz));
+			fwrite(fwriteid," 15:");
+			fwrite(fwriteid,num2str(corxz));
+
+			fwrite(fwriteid," 16:");
+			fwrite(fwriteid,num2str(avgx(i)));
+			fwrite(fwriteid," 17:");
+			fwrite(fwriteid,num2str(avgy(i)));
+			fwrite(fwriteid," 18:");
+			fwrite(fwriteid,num2str(avgz(i)));
+			fwrite(fwriteid," 19:");
+			fwrite(fwriteid,num2str(avgt(i)));
+
+
+			fwrite(fwriteid," 20:");
+			fwrite(fwriteid,num2str(avgx1));
+			fwrite(fwriteid," 21:");
+			fwrite(fwriteid,num2str(avgy1));
+			fwrite(fwriteid," 22:");
+			fwrite(fwriteid,num2str(avgz1));
+			fwrite(fwriteid," 23:");
+			fwrite(fwriteid,num2str(avgt1));
+
+			%%Power
+			fwrite(fwriteid," 24:");
+			fwrite(fwriteid,num2str(engx(i)));
+			fwrite(fwriteid," 25:");
+			fwrite(fwriteid,num2str(engy(i)));
+			fwrite(fwriteid," 26:");
+			fwrite(fwriteid,num2str(engz(i)));
+			fwrite(fwriteid," 27:");
+			fwrite(fwriteid,num2str(engt(i)));
+
+			%%Correlation
+			fwrite(fwriteid," 28:");
+			fwrite(fwriteid,num2str(corxy));
+			fwrite(fwriteid," 29:");
+			fwrite(fwriteid,num2str(coryz));
+			fwrite(fwriteid," 30:");
+			fwrite(fwriteid,num2str(corxz));
+
+			fwrite(fwriteid,"\n");
+			flag=windowsize/2;
+			avgx1=0;
+			avgy1=0;
+			avgz1=0;
+			avgt1=0;
+
+			avgx12=0;
+			avgy12=0;
+			avgz12=0;
+			avgt12=0;
+			i=i+1;
+		else
+			avgx1=avgx1+(avgx(i)-values(2))^2;
+			avgy1=avgy1+(avgy(i)-values(3))^2;
+			avgz1=avgz1+(avgz(i)-values(4))^2;
+			avgt1=avgt1+(avgt(i)-sqrt(values(2)^2+values(3)^2+values(4)^2))^2;
+			avgxold=avgxold+(avgx(i)-values(2))^2;
+			avgyold=avgyold+(avgy(i)-values(3))^2;
+			avgzold=avgzold+(avgz(i)-values(4))^2;
+			avgtold=avgtold+(avgt(i)-sqrt(values(2)^2+values(3)^2+values(4)^2))^2;
+
+			corxy=corxy+values(2)*values(3);
+			coryz=coryz+values(3)*values(4);
+			corxz=corxz+values(2)*values(4);
+			
+			corxyold=corxyold+values(2)*values(3);
+			coryzold=coryzold+values(3)*values(4);
+			corxzold=corxzold+values(2)*values(4);
+
+			avgx12=avgx12+(avgx2(i)-values2(2))^2;
+			avgy12=avgy12+(avgy2(i)-values2(3))^2;
+			avgz12=avgz12+(avgz2(i)-values2(4))^2;
+			avgt12=avgt12+(avgt2(i)-sqrt(values2(2)^2+values2(3)^2+values2(4)^2))^2;
+			avgxold2=avgxold2+(avgx2(i)-values2(2))^2;
+			avgyold2=avgyold2+(avgy2(i)-values2(3))^2;
+			avgzold2=avgzold2+(avgz2(i)-values2(4))^2;
+			avgtold2=avgtold2+(avgt2(i)-sqrt(values2(2)^2+values2(3)^2+values2(4)^2))^2;
+
+			corxy2=corxy2+values2(2)*values2(3);
+			coryz2=coryz2+values2(3)*values2(4);
+			corxz2=corxz2+values2(2)*values2(4);
+			
+			corxyold2=corxyold2+values2(2)*values2(3);
+			coryzold2=coryzold2+values2(3)*values2(4);
+			corxzold2=corxzold2+values2(2)*values2(4);
+		end
+	end
+	line=fgetl(fid);
+	line2=fgetl(fid2);
+	lineno=lineno+1;
+end
+%%end
+
+
+
+fclose(fwriteid);
+fclose(fid);
+

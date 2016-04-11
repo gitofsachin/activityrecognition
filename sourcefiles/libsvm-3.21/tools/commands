@@ -1,0 +1,9 @@
+../svm-scale -l -1 -u 1 -s scalepars mytraining > mytraining_scaled
+../svm-scale -r scalepars mydata > mydata_scaled
+./grid.py mytraining_scaled > gridoutput
+
+CPAR=$(grep -Eo '^[0-9.]*' gridoutput | tail -1)
+GPAR=$(grep -Eo '\s[0-9.]*\s' gridoutput | tail -1)
+
+../svm-train -c $CPAR -g $GPAR mytraining_scaled mytraining_model
+../svm-predict mydata_scaled mytraining_model output

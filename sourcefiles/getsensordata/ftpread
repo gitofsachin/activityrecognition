@@ -1,0 +1,2 @@
+curl -s http://10.42.0.54:1234/storage/emulated/0/Accelerometer.txt >Accelerometer_file.txt
+curl -s http://10.42.0.54:1234/storage/emulated/0/Gyroscope.txt >Gyroscope_file.txt

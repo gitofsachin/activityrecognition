@@ -1,0 +1,4 @@
+Create a new project in Android Studio
+Name the project as "ActivityMonitor"
+Replace the files "MainActivity.java","activity_main.xml","FileOperations.java" and "AndroidManifest.xml" in the project with the corresponding files in this directory
+Replace "sachin" in the above files with your username - Your username comes as default when new project is created. There is one occurence in each of the files

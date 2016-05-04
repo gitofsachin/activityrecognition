@@ -1,43 +1,54 @@
 /************************************************************
-        ACTIVITY MONITORING USING SMARTPHONE
-            SACHIN S AND SAJNA REMI CLERE
-        Indian Institute of Science, Bangalore
+ ACTIVITY MONITORING USING SMARTPHONE
+ SACHIN S AND SAJNA REMI CLERE
+ Indian Institute of Science, Bangalore
 
  Logs gyroscope and linear accelerometer data on tcp request
  and sends back to the request device through TCP
-************************************************************/
+ ************************************************************/
 
 package com.example.sachin.activitymonitor;
 
-        import java.io.IOException;
-        import java.io.OutputStream;
-        import java.io.PrintStream;
-        import java.net.InetAddress;
-        import java.net.NetworkInterface;
-        import java.net.ServerSocket;
-        import java.net.Socket;
-        import java.net.SocketException;
-        import java.util.Arrays;
-        import java.util.Enumeration;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.util.Arrays;
+import java.util.Enumeration;
 
-        import android.hardware.Sensor;
-        import android.hardware.SensorEvent;
-        import android.hardware.SensorEventListener;
-        import android.hardware.SensorManager;
-        import android.os.Bundle;
-        import android.app.Activity;
-        import android.util.Log;
-        import android.widget.TextView;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.Bundle;
+import android.app.Activity;
+import android.util.Log;
+import android.widget.TextView;
 
 public class MainActivity extends Activity
 {
-    public static int samplesperrequest=128;
+    public static int samplesperrequest=512
+            ;
     TextView info, infoip, msg;
     String message = "";
     ServerSocket serverSocket;
 
+
+    static int numberofreadings;
+    static int linaccnumberofreadings;
+    static int gyrodone;
+    static int linaccdone;
+    static float [][]gyro=new float[samplesperrequest][3];
+    static float [][]linacc=new float[samplesperrequest][3];
+    static long []gyrotime= new long[samplesperrequest];
+    static long []linacctime= new long[samplesperrequest];
+
     @Override
-    protected void onCreate(Bundle savedInstanceState)
+    public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -45,8 +56,11 @@ public class MainActivity extends Activity
         infoip = (TextView) findViewById(R.id.infoip);
         msg = (TextView) findViewById(R.id.msg);
 
-        infoip.setText(getIpAddress());
+        FileOperations fop= new FileOperations();
+        fop.write("Accelerometer","");
+        fop.write("Gyroscope","");
 
+        infoip.setText(getIpAddress());
         Thread socketServerThread = new Thread(new SocketServerThread());
         socketServerThread.start();
     }
@@ -69,17 +83,83 @@ public class MainActivity extends Activity
         }
     }
 
-    private class SocketServerThread extends Thread
+    private class SocketServerThread extends Thread implements SensorEventListener
     {
 
+        private SensorManager sensorManager;
         static final int SocketServerPORT = 8080;
         int count = 0;
 
+        @Override
+        public void onSensorChanged(SensorEvent event)
+        {
+            float [] values= event.values;
+            if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE)
+            {
+                if(gyrodone==0)
+                {
+                    gyro[numberofreadings][0] = values[0];
+                    gyro[numberofreadings][1] = values[1];
+                    gyro[numberofreadings][2] = values[2];
+                    gyrotime[numberofreadings] = event.timestamp;
+                    numberofreadings = numberofreadings + 1;
+
+                    FileOperations fop= new FileOperations();
+                    fop.append("Gyroscope",event.timestamp+" "+values[0]+" "+values[1]+" "+values[2]+",\n");
+                }
+                if (numberofreadings == samplesperrequest)
+                {
+                    gyrodone=1;
+                    if(linaccdone==1)//other sensors done with capturing
+                    {
+                        //sensorManager.unregisterListener(this);
+                    }
+                }
+            }
+            if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION)
+            {
+                if(linaccdone==0)
+                {
+                    linacc[linaccnumberofreadings][0] = values[0];
+                    linacc[linaccnumberofreadings][1] = values[1];
+                    linacc[linaccnumberofreadings][2] = values[2];
+                    linacctime[linaccnumberofreadings] = event.timestamp;
+                    linaccnumberofreadings = linaccnumberofreadings + 1;
+
+                    FileOperations fop= new FileOperations();
+                    fop.append("Accelerometer",event.timestamp+" "+values[0]+" "+values[1]+" "+values[2]+",\n");
+                }
+                if (linaccnumberofreadings == samplesperrequest)
+                {
+                    linaccdone=1;
+                    if(gyrodone==1)//other sensors done with capturing
+                    {
+                        //sensorManager.unregisterListener(this);
+                    }
+                }
+            }
+        }
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy)
+        {
+
+        }
         @Override
         public void run()
         {
             try
             {
+                numberofreadings=0;
+                gyrodone=1;
+                linaccnumberofreadings=0;
+                linaccdone=1;
+                sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+                sensorManager.registerListener(this,
+                        sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
+                        SensorManager.SENSOR_DELAY_FASTEST);
+                sensorManager.registerListener(this,
+                        sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
+                        SensorManager.SENSOR_DELAY_FASTEST);
                 serverSocket = new ServerSocket(SocketServerPORT);
                 MainActivity.this.runOnUiThread(new Runnable()
                 {
@@ -124,19 +204,10 @@ public class MainActivity extends Activity
 
     }
 
-    private class SocketServerReplyThread extends Thread implements SensorEventListener
+    private class SocketServerReplyThread extends Thread
     {
-        private SensorManager sensorManager;
         private Socket hostThreadSocket;
         int cnt;
-        int numberofreadings;
-        int linaccnumberofreadings;
-        int gyrodone;
-        int linaccdone;
-        float [][]gyro=new float[samplesperrequest][3];
-        float [][]linacc=new float[samplesperrequest][3];
-        long []gyrotime= new long[samplesperrequest];
-        long []linacctime= new long[samplesperrequest];
 
         SocketServerReplyThread(Socket socket, int c)
         {
@@ -144,54 +215,6 @@ public class MainActivity extends Activity
             cnt = c;
         }
 
-        @Override
-        public void onSensorChanged(SensorEvent event)
-        {
-            float [] values= event.values;
-            if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE)
-            {
-                if(gyrodone==0)
-                {
-                    gyro[numberofreadings][0] = values[0];
-                    gyro[numberofreadings][1] = values[1];
-                    gyro[numberofreadings][2] = values[2];
-                    gyrotime[numberofreadings] = event.timestamp;
-                    numberofreadings = numberofreadings + 1;
-                }
-                if (numberofreadings == samplesperrequest)
-                {
-                    gyrodone=1;
-                    if(linaccdone==1)//other sensors done with capturing
-                    {
-                        sensorManager.unregisterListener(this);
-                    }
-                }
-            }
-            if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION)
-            {
-                if(linaccdone==0)
-                {
-                    linacc[linaccnumberofreadings][0] = values[0];
-                    linacc[linaccnumberofreadings][1] = values[1];
-                    linacc[linaccnumberofreadings][2] = values[2];
-                    linacctime[linaccnumberofreadings] = event.timestamp;
-                    linaccnumberofreadings = linaccnumberofreadings + 1;
-                }
-                if (linaccnumberofreadings == samplesperrequest)
-                {
-                    linaccdone=1;
-                    if(gyrodone==1)//other sensors done with capturing
-                    {
-                        sensorManager.unregisterListener(this);
-                    }
-                }
-            }
-        }
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy)
-        {
-
-        }
 
         @Override
         public void run()
@@ -201,19 +224,17 @@ public class MainActivity extends Activity
             String totalmsg;
             String msgReply;
             String msgReplylinacc;
+
+
             try
             {
+                FileOperations fop= new FileOperations();
+                fop.write("Accelerometer","");
+                fop.write("Gyroscope","");
                 numberofreadings=0;
                 gyrodone=0;
                 linaccnumberofreadings=0;
                 linaccdone=0;
-                sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-                sensorManager.registerListener(this,
-                        sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
-                        SensorManager.SENSOR_DELAY_FASTEST);
-                sensorManager.registerListener(this,
-                        sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
-                        SensorManager.SENSOR_DELAY_FASTEST);
 
                 while(numberofreadings<samplesperrequest||linaccnumberofreadings<samplesperrequest)
                 {
@@ -223,11 +244,13 @@ public class MainActivity extends Activity
                 msgReplylinacc="";
                 for(int i=0;i<samplesperrequest;i++)
                 {
-                    msgReply=msgReply+Long.toString(gyrotime[i])+" "+Arrays.toString(gyro[i]).replace("[", "").replace("]", "").replace(",","")+",\n";
-                    msgReplylinacc=msgReplylinacc+Long.toString(linacctime[i])+" "+Arrays.toString(linacc[i]).replace("[", "").replace("]", "").replace(",","")+",\n";
+//                    msgReply=msgReply+Long.toString(gyrotime[i])+" "+Arrays.toString(gyro[i]).replace("[", "").replace("]", "").replace(",","")+",\n";
+//                    msgReplylinacc=msgReplylinacc+Long.toString(linacctime[i])+" "+Arrays.toString(linacc[i]).replace("[", "").replace("]", "").replace(",","")+",\n";
                 }
+                msgReply="done";
+                msgReplylinacc="done";
                 Log.d("Length:","->"+msgReply.length());
-                Log.d("Linacclength:","->"+msgReplylinacc.length());
+                Log.d("Linacclength:", "->" + msgReplylinacc.length());
                 outputStream = hostThreadSocket.getOutputStream();
                 PrintStream printStream = new PrintStream(outputStream);
 

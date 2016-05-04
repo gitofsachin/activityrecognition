@@ -5,10 +5,4 @@ Getting data on TCP request
 3. Note down the ip address of the device from app screen
 3. ./getdata.out <IPAddr> req
 		Example: ./getdata.out 10.42.0.54 req
-4. Output will come in gyro.txt and linacc.txt
-
-
-Getting data continuously logged in file
-Change ip address in ftpread file to the ip seen in wifi file transfer app
-./ftpread
-Output in Accelerometer_file.txt and Gyroscope_file.txt
+4. Output will come in Gyroscope_file.txt and Accelerometer_file.txt

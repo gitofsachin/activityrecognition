@@ -107,7 +107,8 @@ int main(int argc, char *argv[])
 	FILE *fptr;
 	int nooflines=0;
 	int readstate=0;
-	while (totalBytesRcvd < sizetoread-1)
+	//fptr=fopen("gyro.txt","w");
+	while (totalBytesRcvd < sizetoread)
     {
         /* Receive up to the buffer size (minus 1 to leave space for
            a null terminator) bytes from the sender */
@@ -115,35 +116,12 @@ int main(int argc, char *argv[])
             ErrorExit("recv() failed or connection closed prematurely");
         totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
         echoBuffer[bytesRcvd] = '\0';  /* Terminate the string! */
-		if(echoBuffer[0]=='\n')
-		{
-			nooflines++;
-		}
-		if(readstate==0)
-		{
-			fptr=fopen("gyro.txt","w");
-		}
-		else if(readstate==2)
-		{
-			fclose(fptr);
-			fptr=fopen("linacc.txt","w");
-		}
-        switch(readstate)
-		{
-			case 0: readstate=1;break;
-			case 1: if(nooflines==128)readstate=2;break;
-			case 2: readstate=3;break;
-			case 3: if(nooflines==256)readstate=4;break;
-			default: break;
-		}
-		fprintf(fptr,"%s",echoBuffer);      /* Print the data to file*/
-		if(readstate==4)
-		{
-			fclose(fptr);
-		}
+		//fprintf(fptr,"%s",echoBuffer);      /* Print the data to file*/
     }
 
+	//fclose(fptr);
     close(sock);
+	system("./ftpread");
     exit(0);
 }
 

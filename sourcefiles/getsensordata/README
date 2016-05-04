@@ -9,5 +9,6 @@ Getting data on TCP request
 
 
 Getting data continuously logged in file
+Change ip address in ftpread file to the ip seen in wifi file transfer app
 ./ftpread
 Output in Accelerometer_file.txt and Gyroscope_file.txt
